@@ -20,7 +20,8 @@ class Places extends Component {
                         description: p.description,
                         adressId: p.adressId,
                         placeType: p.placeTypes,
-                        smallDescription: p.smallDescription
+                        smallDescription: p.smallDescription,
+                        image: p.image
                     };
                 });
 
@@ -45,7 +46,8 @@ class Places extends Component {
                         description: p.description,
                         adressId: p.adressId,
                         placeType: p.placeTypes,
-                        smallDescription: p.smallDescription
+                        smallDescription: p.smallDescription,
+                        image: p.image
                     };
                 });
 

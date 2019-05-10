@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { Button, FormGroup, FormControl } from "react-bootstrap";
 import axios from "axios";
+import {MenuItem, Paper, Select, Table, TableBody, TableCell, TableHead, TableRow, TextField} from "@material-ui/core";
+import AdminPlace from "./AdminPlace";
 
 export default class PlaceEditor extends Component {
     constructor(props) {
@@ -10,9 +12,67 @@ export default class PlaceEditor extends Component {
             name: "",
             smallDescription: "",
             description: "",
-            placeTypeId: "",
-            addressId: ""
+            placeType: "",
+            addressId: "",
+            image: "",
+            placeTypes: [],
+            places: []
         };
+    }
+
+    getPlaceTypes() {
+        return axios({
+            method: 'GET',
+            url: 'http://localhost:8000/placetype'
+        })
+    }
+
+    handleSelectChange = event => {
+        this.setState({
+            [event.target.name]: event.target.value
+        });
+    }
+
+    getPlaces() {
+        return axios({
+            method: 'GET',
+            url: 'http://localhost:8000/api/place'
+        })
+    }
+
+    async componentDidMount() {
+        let [placeTypes, places] = await Promise.all([
+            this.getPlaceTypes(),
+            this.getPlaces()
+        ]);
+
+        placeTypes = JSON.parse(placeTypes.data);
+        places = JSON.parse(places.data);
+        console.log(places);
+
+        const newPlaces = places.map(p => {
+            return {
+                id: p.id,
+                name: p.placeName,
+                description: p.description,
+                adressId: p.adressId,
+                placeType: p.placeTypes,
+                smallDescription: p.smallDescription,
+                image: p.image
+            };
+        });
+
+        const newPlaceTypeState = placeTypes.map(p => {
+            return {
+                id: p.id,
+                name: p.placeTypeName,
+            };
+        });
+
+        this.setState({
+            placeTypes: newPlaceTypeState,
+            places: newPlaces
+        })
     }
 
     validateForm() {
@@ -36,71 +96,100 @@ export default class PlaceEditor extends Component {
                     name: this.state.name,
                     smallDescription: this.state.smallDescription,
                     description: this.state.description,
-                    placeTypeId: this.state.placeTypeId,
+                    placeTypeId: this.state.placeType,
+                    image: this.state.image,
                     addressId: this.state.addressId
                 }
             });
-            console.log(response);
+
+            if (response.status === 200) {
+                alert("Place added");
+            }
         } catch (e) {
+            alert("Error: Try later");
             console.log(e.message);
         }
     }
 
     render() {
         return (
-            <div className="place-edit">
-                <form onSubmit={this.handleSubmit}>
-                    <FormGroup controlId="name" bsSize="large">
-                        <label>Name</label>
-                        <FormControl
-                            autoFocus
-                            type="text"
-                            value={this.state.name}
-                            onChange={this.handleChange}
-                        />
-                    </FormGroup>
-                    <FormGroup controlId="smallDescription" bsSize="large">
-                        <label>Small description</label>
-                        <FormControl
-                            value={this.state.smallDescription}
-                            onChange={this.handleChange}
-                            type="text"
-                        />
-                    </FormGroup>
-                    <FormGroup controlId="description" bsSize="large">
-                        <label>Description</label>
-                        <FormControl
-                            value={this.state.description}
-                            onChange={this.handleChange}
-                            type="text"
-                        />
-                    </FormGroup>
-                    <FormGroup controlId="placeTypeId" bsSize="large">
-                        <label>Place Type ID</label>
-                        <FormControl
-                            value={this.state.placeTypeId}
-                            onChange={this.handleChange}
-                            type="text"
-                        />
-                    </FormGroup>
-                    <FormGroup controlId="addressId" bsSize="large">
-                        <label>Address ID</label>
-                        <FormControl
-                            value={this.state.addressId}
-                            onChange={this.handleChange}
-                            type="text"
-                        />
-                    </FormGroup>
-                    <Button
-                        block
-                        bsSize="large"
-                        disabled={!this.validateForm()}
-                        type="submit"
-                    >
-                        Login
-                    </Button>
-                </form>
-            </div>
+            <Paper className="place-edit">
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Small Description</TableCell>
+                            <TableCell>Description</TableCell>
+                            <TableCell>Image</TableCell>
+                            <TableCell>Place Type</TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell>
+                                <TextField
+                                    id="name"
+                                    autoFocus
+                                    type="text"
+                                    value={this.state.name}
+                                    onChange={this.handleChange}
+                                />
+                            </TableCell>
+                            <TableCell>
+                                <TextField
+                                    id="smallDescription"
+                                    value={this.state.smallDescription}
+                                    onChange={this.handleChange}
+                                    type="text"
+                                />
+                            </TableCell>
+                            <TableCell>
+                                <TextField
+                                    id="description"
+                                    value={this.state.description}
+                                    onChange={this.handleChange}
+                                    type="text"
+                                />
+                            </TableCell>
+                            <TableCell>
+                                <TextField
+                                    id="image"
+                                    value={this.state.image}
+                                    onChange={this.handleChange}
+                                    type="text"
+                                />
+                            </TableCell>
+                            <TableCell>
+                                <Select id="placeType" onChange={this.handleSelectChange}
+                                        value={this.state.placeType}
+                                        inputProps={{
+                                            name: 'placeType',
+                                            id: 'placeType',
+                                        }}>
+                                    {this.state.placeTypes.map((placeType, i) => {
+                                        return (<MenuItem key={i}
+                                                          value={placeType.id}>{placeType.name}</MenuItem>)
+                                    })}
+                                </Select>
+                            </TableCell>
+                            <TableCell>
+                                <Button
+                                    onClick={this.handleSubmit}
+                                    block
+                                    bsSize="large"
+                                    disabled={!this.validateForm()}
+                                    type="submit"
+                                >
+                                    Add
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {this.state.places.map((place, i) => {
+                            return (<AdminPlace key={i} place={place} placeTypes={this.state.placeTypes}/>)
+                        })}
+                    </TableBody>
+                </Table>
+            </Paper>
         );
     }
 }

@@ -21,7 +21,8 @@ class DetailPlace extends Component {
                         name: p.product_name,
                         description: p.description,
                         image: p.image,
-                        menuId: p.menu_id
+                        menuId: p.menu_id,
+                        cost: p.cost
                     }
 
                 });
@@ -60,11 +61,11 @@ class DetailPlace extends Component {
             .get("http://localhost:8000/place/" + this.props.match.params.placeId + "/details")
             .then(response => {
                 let menus = JSON.parse(response.data.menus);
-
+            console.log(menus);
                 const newMenusState = menus.map(m => {
                     return {
                         id: m.id,
-                        name: m.menuName
+                        name: m.menu_name
                     };
                 });
 
@@ -74,7 +75,8 @@ class DetailPlace extends Component {
                         name: p.product_name,
                         description: p.description,
                         image: p.image,
-                        menuId: p.menu_id
+                        menuId: p.menu_id,
+                        cost: p.cost
                     }
 
                 });

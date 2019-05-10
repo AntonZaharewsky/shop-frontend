@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import PlaceEditor from "./PlaceEditor";
+import { Link } from "react-router-dom";
+
 
 class AdminPanel extends Component {
     constructor(props) {
@@ -10,7 +11,12 @@ class AdminPanel extends Component {
         return (
             <div>
                 <h1>Admin</h1>
-                <PlaceEditor/>
+                <Link to={`/admin/place`}>Place</Link>
+                <Link to={`/admin/product`}>Product</Link>
+                <Link to={`/admin/sql`}>SQL</Link>
+                <Link to={`/admin/orders`}>Orders</Link>
+                <Link to={`/admin/images`}>Upload Image</Link>
+                <Link to={`/admin/payment-methods`}>Payment Methods</Link>
             </div>
         );
     }

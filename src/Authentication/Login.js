@@ -1,10 +1,20 @@
 import React, { Component } from "react";
-import { Button, FormGroup, FormControl } from "react-bootstrap";
 import { Redirect } from 'react-router-dom';
 import axios from "axios";
 import "./Login.css";
+import { Paper, withStyles, Grid, TextField, Button, FormControlLabel, Checkbox } from '@material-ui/core';
 
-export default class Login extends Component {
+const styles = theme => ({
+    margin: {
+        width: '50%',
+        margin: '0 auto'
+    },
+    padding: {
+        padding: theme.spacing.unit
+    }
+});
+
+class Login extends Component {
     constructor(props) {
         super(props);
 
@@ -56,37 +66,46 @@ export default class Login extends Component {
     }
 
     render() {
+        const { classes } = this.props;
         return (
-            <div className="Login">
+            <Paper className={classes.margin}>
                 {this.renderRedirect()}
-                <form onSubmit={this.handleSubmit}>
-                    <FormGroup controlId="email" bsSize="large">
-                        <label>Email</label>
-                        <FormControl
-                            autoFocus
-                            type="email"
-                            value={this.state.email}
-                            onChange={this.handleChange}
-                        />
-                    </FormGroup>
-                    <FormGroup controlId="password" bsSize="large">
-                        <label>Password</label>
-                        <FormControl
-                            value={this.state.password}
-                            onChange={this.handleChange}
-                            type="password"
-                        />
-                    </FormGroup>
-                    <Button
-                        block
-                        bsSize="large"
-                        disabled={!this.validateForm()}
-                        type="submit"
-                    >
-                        Login
-                    </Button>
-                </form>
-            </div>
+                <div className={classes.padding}>
+                    <Grid container spacing={8} alignItems="flex-end">
+                        <Grid item>
+                            {/*<Face />*/}
+                        </Grid>
+                        <Grid item md={true} sm={true} xs={true}>
+                            <TextField id="email" label="email" value={this.state.email} onChange={this.handleChange} type="email" fullWidth autoFocus required />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={8} alignItems="flex-end">
+                        <Grid item>
+                            {/*<Fingerprint />*/}
+                        </Grid>
+                        <Grid item md={true} sm={true} xs={true}>
+                            <TextField id="password" value={this.state.password} onChange={this.handleChange} label="Password" type="password" fullWidth required />
+                        </Grid>
+                    </Grid>
+                    <Grid container alignItems="center" justify="space-between">
+                        <Grid item>
+                            <FormControlLabel control={
+                                <Checkbox
+                                    color="primary"
+                                />
+                            } label="Remember me" />
+                        </Grid>
+                        <Grid item>
+                            <Button disableFocusRipple disableRipple style={{ textTransform: "none" }} variant="text" color="primary">Forgot password ?</Button>
+                        </Grid>
+                    </Grid>
+                    <Grid container justify="center" style={{ marginTop: '10px' }}>
+                        <Button variant="outlined" disabled={!this.validateForm()} onClick={this.handleSubmit} color="primary" style={{ textTransform: "none" }}>Login</Button>
+                    </Grid>
+                </div>
+            </Paper>
         );
     }
+
 }
+export default withStyles(styles)(Login);
