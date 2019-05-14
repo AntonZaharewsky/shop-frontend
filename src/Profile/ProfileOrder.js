@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
     TableRow,
     TableCell,
@@ -13,15 +13,17 @@ import {
 } from '@material-ui/core';
 import axios from 'axios';
 
-export default class AdminOrder extends Component {
+export default class ProfileOrder extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
             orderInfo: this.props.orderInfo,
+            returnReasons: this.props.returnReasons,
             openModal: false,
             orderLines: [],
-            orderHistory: []
+            orderHistory: [],
+            selectedReason: 0
         }
     }
 
@@ -56,51 +58,56 @@ export default class AdminOrder extends Component {
         })
     }
 
-    async delivery() {
-        const response = await axios({
-            method: 'POST',
-            url: 'http://localhost:8000/admin/order/delivery/' + this.state.orderInfo.order_id
+    handleSelectChange = event => {
+        this.setState({
+            [event.target.name]: event.target.value
         });
-
-        if (response.status === 200) {
-            const orderInfo = {...this.state.orderInfo}
-            orderInfo.delivered = 1;
-            this.setState({orderInfo});
-
-            alert('Order delivered');
-        }
     }
 
-    async deliveryRollBack() {
+    async returnOrder() {
         const response = await axios({
             method: 'POST',
-            url: 'http://localhost:8000/admin/order/delivery/' + this.state.orderInfo.order_id + '/rollback'
+            url: 'http://localhost:8000/return',
+            data: {
+                orderId: this.state.orderInfo.order_id,
+                returnReasonId: this.state.selectedReason
+            }
         });
 
-        if (response.status === 200) {
-            const orderInfo = {...this.state.orderInfo}
-            orderInfo.delivered = 0;
-            this.setState({orderInfo});
-
-            alert('Order delivery is rolled back');
-        }
+        // if (response.status === 200) {
+        //     const orderInfo = {...this.state.orderInfo}
+        //     orderInfo.delivered = 1;
+        //     this.setState({orderInfo});
+        //
+        //     alert('Order delivered');
+        // }
     }
 
     render() {
         return (
             <TableRow hover={true}>
-                <TableCell>{ this.state.orderInfo.order_id }</TableCell>
-                <TableCell>{ this.state.orderInfo.email }</TableCell>
-                <TableCell>{ this.state.orderInfo.city }</TableCell>
-                <TableCell>{ Boolean(Number(this.state.orderInfo.delivered)) === true ? 'Delivered' : 'Not delivered' }</TableCell>
-                <TableCell>{Boolean(Number(this.state.orderInfo.delivered)) === true ?
-                    <Button onClick={() => this.deliveryRollBack()}>Rollback Delivery</Button>:
-                    <Button onClick={() => this.delivery()}>Delivery</Button>}
-                    <Button onClick={() => this.handleOpen()}>Show Details</Button>
+                <TableCell>{this.state.orderInfo.order_id}</TableCell>
+                <TableCell>{this.state.orderInfo.city}</TableCell>
+                <TableCell>{Boolean(Number(this.state.orderInfo.delivered)) === true ? 'Delivered' : 'Not delivered'}</TableCell>
+                <TableCell>
+                    <Select id="selectedReason" onChange={this.handleSelectChange}
+                            value={this.state.selectedReason}
+                            inputProps={{
+                                name: 'selectedReason',
+                                id: 'selectedReason',
+                            }}>
+                        {this.state.returnReasons.map((returnReason, i) => {
+                            return (<MenuItem key={i}
+                                              value={returnReason.idreturn_reasons}>{returnReason.return_reason_name}</MenuItem>)
+                        })}
+                    </Select>
+                </TableCell>
+                <TableCell>
+                    <Button onClick={() => this.returnOrder()}>Return order</Button>
                 </TableCell>
                 {this.state.orderLines.length > 0 &&
                 <Modal open={this.state.openModal} onClose={this.handleClose.bind(this)}>
-                    <div style={{width: '50%', height: 'auto', backgroundColor: 'white', margin: '0 auto'}} >
+                    <div style={{width: '50%', height: 'auto', backgroundColor: 'white', margin: '0 auto'}}>
                         <h1>Order Lines</h1>
                         <Table>
                             <TableHead>
@@ -112,16 +119,16 @@ export default class AdminOrder extends Component {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                    {this.state.orderLines.map((orderLine, i) => {
-                                        return (
-                                            <TableRow>
-                                                <TableCell>{orderLine.product_name}</TableCell>
-                                                <TableCell>{orderLine.description}</TableCell>
-                                                <TableCell>{orderLine.cost}</TableCell>
-                                                <TableCell>{orderLine.quantity}</TableCell>
-                                            </TableRow>
-                                        )
-                                    })}
+                                {this.state.orderLines.map((orderLine, i) => {
+                                    return (
+                                        <TableRow>
+                                            <TableCell>{orderLine.product_name}</TableCell>
+                                            <TableCell>{orderLine.description}</TableCell>
+                                            <TableCell>{orderLine.cost}</TableCell>
+                                            <TableCell>{orderLine.quantity}</TableCell>
+                                        </TableRow>
+                                    )
+                                })}
                             </TableBody>
                         </Table>
                         <h1>Order History</h1>

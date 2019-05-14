@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import './App.css';
 import Places from './Place/Places.js';
-import {BrowserRouter as Router, Link, Route} from "react-router-dom";
+import {BrowserRouter as Router, Link, Route, Redirect} from "react-router-dom";
 import About from "./General/About";
 import DetailPlace from "./Place/DetailPlace";
 import Login from "./Authentication/Login";
@@ -17,9 +17,40 @@ import {AppBar, Tabs, Tab} from '@material-ui/core';
 import OrdersEditor from "./Admin/OrdersEditor";
 import ImageUploader from "./Admin/ImageUploader";
 import PaymentMethodEditor from "./Admin/PaymentMethodEditor";
+import UsersEditor from "./Admin/UsersEditor";
+import UserProfile from "./Profile/UserProfile";
+
+const AdminRoute = ({ component: Component, ...rest }) => (
+    <Route {...rest} render={(props) => (
+        localStorage.getItem('user') !== null && JSON.parse(localStorage.getItem('user')).role[0] === 'ROLE_ADMIN'
+            ? <Component {...props} />
+            : <Redirect to='/' />
+    )} />
+);
+
+const UserRoute = ({ component: Component, ...rest }) => (
+    <Route {...rest} render={(props) => (
+        localStorage.getItem('user') !== null
+            ? <Component {...props} />
+            : <Redirect to='/' />
+    )} />
+);
 
 class App extends Component {
-    checkLogin() {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            user: localStorage.getItem('user') === null ? {} : JSON.parse(localStorage.getItem('user')),
+            logoutRedirect: false
+        }
+    }
+
+    setUser(user) {
+        this.setState({user: user});
+    }
+
+    async checkLogin() {
         if (localStorage.getItem("accessToken") !== null) {
             axios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem("accessToken");
         }
@@ -28,6 +59,10 @@ class App extends Component {
     logout() {
         localStorage.removeItem("accessToken");
         axios.defaults.headers.common['Authorization'] = '';
+        localStorage.removeItem('user');
+        this.setState({user: {}});
+
+        window.location = '/login';
     }
 
     render() {
@@ -40,14 +75,18 @@ class App extends Component {
                         <Tabs>
                             <Tab label="Home" component={Link} to="/"/>
                             <Tab label="About" component={Link} to="/about"/>
-                            <Tab label="Topics" component={Link} to="/topics"/>
-                            <Tab label="Login" component={Link} to="/login"/>
-                            <Tab label="Sign Up" component={Link} to="/register"/>
+                            {Object.keys(this.state.user).length > 0 ?
+                                <Tab label="Profile" component={Link} to="/profile" /> :
+                                <div><Tab label="Login" component={Link} to="/login"/>
+                                    <Tab label="Sign Up" component={Link} to="/register"/></div>}
                             <Tab label="Basket" component={Link} to="/basket"/>
-                            <Tab label="Logout">
-                                <a onClick={() => this.logout()}>Logout</a>
-                            </Tab>
-                            <Tab label="Admin panel" component={Link} to="/admin"/>
+                            {Object.keys(this.state.user).length > 0 ?
+                                <Tab label="Logout" onClick={() => this.logout()}/> :
+                                ''}
+                            {Object.keys(this.state.user).length > 0 && this.state.user.role[0] === "ROLE_ADMIN" ?
+                                <Tab label="Admin panel" component={Link} to="/admin"/> :
+                                ''
+                            }
                         </Tabs>
                     </AppBar>
 
@@ -58,19 +97,24 @@ class App extends Component {
 
                     <Route exact path="/" component={Places}/>
                     <Route path="/about" component={About}/>
-                    <Route path="/login" exact component={Login}/>
+                    <Route
+                        path='/login'
+                        render={(props) => <Login {...props} setUser={this.setUser.bind(this)}/>}
+                    />
                     <Route path="/register" component={Register}/>
                     <Route path={`/place/:placeId`} component={DetailPlace}/>
                     <Route path="/basket" component={Basket}/>
                     <Route path="/checkout" component={Checkout}/>
-                    <Route path="/admin" component={AdminPanel}/>
-                    <Route path="/admin/place" component={PlaceEditor}/>
-                    <Route path="/admin/product" component={ProductEditor}/>
-                    <Route path="/admin/sql" component={Sql}/>
-                    <Route path="/admin/orders" component={OrdersEditor}/>
-                    <Route path="/admin/images" component={ImageUploader}/>
-                    <Route path="/admin/payment-methods" component={PaymentMethodEditor}/>
-                    <Route path={`/admin/places`}/>
+                    <UserRoute path="/profile" component={UserProfile} />
+                    <AdminRoute path="/admin" component={AdminPanel}/>
+                    <AdminRoute path="/admin/place" component={PlaceEditor}/>
+                    <AdminRoute path="/admin/product" component={ProductEditor}/>
+                    <AdminRoute path="/admin/sql" component={Sql}/>
+                    <AdminRoute path="/admin/orders" component={OrdersEditor}/>
+                    <AdminRoute path="/admin/users" component={UsersEditor}/>
+                    <AdminRoute path="/admin/images" component={ImageUploader}/>
+                    <AdminRoute path="/admin/payment-methods" component={PaymentMethodEditor}/>
+                    <AdminRoute path={`/admin/places`}/>
                 </Router>
             </div>
         );

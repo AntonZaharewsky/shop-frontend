@@ -55,12 +55,19 @@ class Checkout extends Component {
     handleSubmit = async event => {
         event.preventDefault();
 
+        const user = localStorage.getItem('user') === null ? {} : JSON.parse(localStorage.getItem('user'));
+
+        if (Object.keys(user).length === 0) {
+            alert("Please login");
+            return;
+        }
+
         try {
             const response = await axios({
                 method: 'POST',
                 url: 'http://localhost:8000/order',
                 data: {
-                    email: "test@test.com",
+                    email: user.email,
                     basket: localStorage.basket,
                     city: this.state.city,
                     street: this.state.street,
@@ -78,7 +85,7 @@ class Checkout extends Component {
         } catch (e) {
             console.log(e.message);
         }
-    }
+    };
 
     render() {
         const content = !this.state.use_current_address

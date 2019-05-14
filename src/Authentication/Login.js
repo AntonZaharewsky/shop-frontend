@@ -57,9 +57,18 @@ class Login extends Component {
             localStorage.setItem('accessToken', response.data.token);
             axios.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.token;
 
+            const user = await axios({
+                method: 'GET',
+                url: 'http://localhost:8000/api'
+            });
+
+            localStorage.setItem('user', JSON.stringify(user.data));
+
             this.setState({
                 loggedIn: true
-            })
+            });
+
+            this.props.setUser(user.data);
         } catch (e) {
             console.log(e.message);
         }
@@ -72,17 +81,11 @@ class Login extends Component {
                 {this.renderRedirect()}
                 <div className={classes.padding}>
                     <Grid container spacing={8} alignItems="flex-end">
-                        <Grid item>
-                            {/*<Face />*/}
-                        </Grid>
                         <Grid item md={true} sm={true} xs={true}>
                             <TextField id="email" label="email" value={this.state.email} onChange={this.handleChange} type="email" fullWidth autoFocus required />
                         </Grid>
                     </Grid>
                     <Grid container spacing={8} alignItems="flex-end">
-                        <Grid item>
-                            {/*<Fingerprint />*/}
-                        </Grid>
                         <Grid item md={true} sm={true} xs={true}>
                             <TextField id="password" value={this.state.password} onChange={this.handleChange} label="Password" type="password" fullWidth required />
                         </Grid>

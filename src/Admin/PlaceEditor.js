@@ -36,7 +36,7 @@ export default class PlaceEditor extends Component {
     getPlaces() {
         return axios({
             method: 'GET',
-            url: 'http://localhost:8000/api/place'
+            url: 'http://localhost:8000/place'
         })
     }
 

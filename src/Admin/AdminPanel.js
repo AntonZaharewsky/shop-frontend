@@ -17,6 +17,7 @@ class AdminPanel extends Component {
                 <Link to={`/admin/orders`}>Orders</Link>
                 <Link to={`/admin/images`}>Upload Image</Link>
                 <Link to={`/admin/payment-methods`}>Payment Methods</Link>
+                <Link to={`/admin/users`}>Users</Link>
             </div>
         );
     }

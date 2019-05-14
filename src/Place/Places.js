@@ -36,7 +36,7 @@ class Places extends Component {
 
     componentDidMount() {
         axios
-            .get("http://localhost:8000/api/place")
+            .get("http://localhost:8000/place")
             .then(response => {
                 let products = JSON.parse(response.data);
                 const newPlaces = products.map(p => {
