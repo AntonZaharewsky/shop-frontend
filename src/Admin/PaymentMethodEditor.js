@@ -8,7 +8,7 @@ import {
     TableRow,
     Paper,
     TextField,
-    Select, MenuItem
+    Select, MenuItem, Button
 } from '@material-ui/core';
 
 import AdminPaymentMethod from "./AdminPaymentMethod";
@@ -18,8 +18,15 @@ export default class PaymentMethodEditor extends Component {
         super(props);
 
         this.state = {
-            paymentMethods: []
+            paymentMethods: [],
+            paymentMethodName: ''
         }
+    }
+
+    handleChange = event => {
+        this.setState({
+            [event.target.id]: event.target.value
+        });
     }
 
     async componentDidMount() {
@@ -33,6 +40,21 @@ export default class PaymentMethodEditor extends Component {
         })
     }
 
+    async createPaymentMethod() {
+        const response  = await axios({
+            method: "POST",
+            url: 'http://localhost:8000/paymentmethod',
+            data: {
+                paymentMethodName: this.state.paymentMethodName
+            }
+        })
+
+
+        if (response.status === 200) {
+            alert('added');
+        }
+    }
+
     render() {
         return (
             <div>
@@ -43,9 +65,25 @@ export default class PaymentMethodEditor extends Component {
                             <TableRow>
                                 <TableCell>Payment method number</TableCell>
                                 <TableCell>Name</TableCell>
+                                <TableCell>Action</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
+                            <TableRow>
+                                <TableCell>ID</TableCell>
+                                <TableCell>
+                                    <TextField
+                                        id="paymentMethodName"
+                                        autoFocus
+                                        type="text"
+                                        value={this.state.paymentMethodName}
+                                        onChange={this.handleChange}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <Button onClick={() => this.createPaymentMethod()}>Add</Button>
+                                </TableCell>
+                            </TableRow>
                             {this.state.paymentMethods.map((paymentMethod, i) => {
                                 return (<AdminPaymentMethod key={i} paymentMethod={paymentMethod} />)
                             })}

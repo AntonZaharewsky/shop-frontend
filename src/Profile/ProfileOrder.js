@@ -17,13 +17,16 @@ export default class ProfileOrder extends Component {
     constructor(props) {
         super(props);
 
+
+
         this.state = {
             orderInfo: this.props.orderInfo,
             returnReasons: this.props.returnReasons,
             openModal: false,
             orderLines: [],
             orderHistory: [],
-            selectedReason: 0
+            selectedReason: 0,
+            isReturned: false
         }
     }
 
@@ -74,13 +77,24 @@ export default class ProfileOrder extends Component {
             }
         });
 
-        // if (response.status === 200) {
-        //     const orderInfo = {...this.state.orderInfo}
-        //     orderInfo.delivered = 1;
-        //     this.setState({orderInfo});
-        //
-        //     alert('Order delivered');
-        // }
+        if (response.status === 200) {
+            alert('Order returned.');
+
+            this.setState({
+                isReturned: true
+            })
+        }
+    }
+
+    async componentDidMount() {
+        const response = await axios({
+            method: 'GET',
+            url: 'http://localhost:8000/isreturned/' + this.state.orderInfo.order_id
+        });
+
+        this.setState({
+            isReturned: response.data
+        })
     }
 
     render() {
@@ -95,7 +109,9 @@ export default class ProfileOrder extends Component {
                             inputProps={{
                                 name: 'selectedReason',
                                 id: 'selectedReason',
-                            }}>
+                            }}
+                            disabled={Boolean(Number(this.state.orderInfo.delivered)) === false || this.state.isReturned === true}
+                    >
                         {this.state.returnReasons.map((returnReason, i) => {
                             return (<MenuItem key={i}
                                               value={returnReason.idreturn_reasons}>{returnReason.return_reason_name}</MenuItem>)
@@ -103,7 +119,12 @@ export default class ProfileOrder extends Component {
                     </Select>
                 </TableCell>
                 <TableCell>
-                    <Button onClick={() => this.returnOrder()}>Return order</Button>
+                    {Boolean(Number(this.state.orderInfo.delivered)) === true ?
+                        this.state.isReturned === false ? <Button onClick={() => this.returnOrder()}>Return order</Button>
+                            : <p>Order is already returned</p>
+                            : <p>You can't return undelivered order.</p>
+                    }
+                    <Button onClick={() => this.handleOpen()}>Show details</Button>
                 </TableCell>
                 {this.state.orderLines.length > 0 &&
                 <Modal open={this.state.openModal} onClose={this.handleClose.bind(this)}>
@@ -121,7 +142,7 @@ export default class ProfileOrder extends Component {
                             <TableBody>
                                 {this.state.orderLines.map((orderLine, i) => {
                                     return (
-                                        <TableRow>
+                                        <TableRow key={i}>
                                             <TableCell>{orderLine.product_name}</TableCell>
                                             <TableCell>{orderLine.description}</TableCell>
                                             <TableCell>{orderLine.cost}</TableCell>

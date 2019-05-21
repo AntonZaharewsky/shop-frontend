@@ -70,7 +70,7 @@ class Login extends Component {
 
             this.props.setUser(user.data);
         } catch (e) {
-            console.log(e.message);
+            alert('Login failed.');
         }
     }
 

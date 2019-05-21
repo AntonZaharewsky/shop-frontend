@@ -21,7 +21,8 @@ export default class AdminOrder extends Component {
             orderInfo: this.props.orderInfo,
             openModal: false,
             orderLines: [],
-            orderHistory: []
+            orderHistory: [],
+            isReturned: false
         }
     }
 
@@ -86,6 +87,17 @@ export default class AdminOrder extends Component {
         }
     }
 
+    async componentDidMount() {
+        const response = await axios({
+            method: 'GET',
+            url: 'http://localhost:8000/isreturned/' + this.state.orderInfo.order_id
+        });
+
+        this.setState({
+            isReturned: response.data
+        })
+    }
+
     render() {
         return (
             <TableRow hover={true}>
@@ -93,6 +105,7 @@ export default class AdminOrder extends Component {
                 <TableCell>{ this.state.orderInfo.email }</TableCell>
                 <TableCell>{ this.state.orderInfo.city }</TableCell>
                 <TableCell>{ Boolean(Number(this.state.orderInfo.delivered)) === true ? 'Delivered' : 'Not delivered' }</TableCell>
+                <TableCell>{ this.state.isReturned === true ? 'Returned' : 'Not returned' }</TableCell>
                 <TableCell>{Boolean(Number(this.state.orderInfo.delivered)) === true ?
                     <Button onClick={() => this.deliveryRollBack()}>Rollback Delivery</Button>:
                     <Button onClick={() => this.delivery()}>Delivery</Button>}

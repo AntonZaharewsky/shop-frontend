@@ -45,6 +45,7 @@ export default class OrdersEditor extends Component {
                               <TableCell>Email</TableCell>
                               <TableCell>Address</TableCell>
                               <TableCell>Is delivered</TableCell>
+                              <TableCell>Is returned</TableCell>
                               <TableCell>Action</TableCell>
                           </TableRow>
                       </TableHead>
